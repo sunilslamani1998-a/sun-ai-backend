@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shri - Jarvis Voice Commander</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #0d1117; color: #c9d1d9; }
+        button { padding: 15px 30px; font-size: 18px; background: #238636; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:hover { background: #2ea043; }
+        #status { margin-top: 20px; font-size: 20px; color: #58a6ff; }
+        #output { margin: 20px auto; width: 60%; padding: 15px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; text-align: left; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <h1>🎙️ Shri (Jarvis) Voice Commander</h1>
+    <p>Say <b>"Hey Shri"</b> followed by your instruction (e.g., <i>"Hey Shri, extract page title from https://example.com"</i>)</p>
+    
+    <button onclick="startListening()">Start Voice Listener</button>
+    
+    <div id="status">Status: Idle (Click to Start)</div>
+    <div id="output">Response will appear here...</div>
+
+    <script>
+        const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/execute";
+        const SECRET_KEY = "sunil-secure-iron-man-passcode"; // Must match your Render JARVIS_SECRET_KEY
+
+        function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech Recognition is not supported in this browser. Please use Google Chrome.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            document.getElementById("status").innerText = "Status: Listening for 'Hey Shri'...";
+
+            recognition.onresult = async function(event) {
+                const speechResult = event.results[event.results.length - 1][0].transcript.trim();
+                console.log("Heard:", speechResult);
+
+                // Check for wake word "Hey Shri" case-insensitively
+                if (speechResult.toLowerCase().includes("hey shri")) {
+                    const commandParts = speechResult.toLowerCase().split("hey shri");
+                    const userCommand = commandParts[1] ? commandParts[1].trim() : "";
+
+                    document.getElementById("status").innerText = `Command Recognized: "${userCommand}"`;
+                    
+                    if (userCommand.length > 0) {
+                        await sendCommandToShri(userCommand);
+                    }
+                }
+            };
+
+            recognition.onerror = function(event) {
+                document.getElementById("status").innerText = "Error occurred: " + event.error;
+            };
+
+            recognition.onend = function() {
+                // Keep continuous listening active
+                recognition.start();
+            };
+
+            recognition.start();
+        }
+
+        async function sendCommandToShri(commandText) {
+            document.getElementById("status").innerText = "Verifying identity & executing...";
+            
+            let targetUrl = "https://example.com";
+            if (commandText.includes("http")) {
+                const words = commandText.split(" ");
+                const found = words.find(w => w.startsWith("http"));
+                if (found) targetUrl = found;
+            }
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "X-Jarvis-Auth": SECRET_KEY
+                    },
+                    body: JSON.stringify({ command: commandText, target_url: targetUrl })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Access rejected. Invalid credentials or unauthorized user.");
+                }
+
+                const data = await response.json();
+                document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+                document.getElementById("status").innerText = "Status: Ready & Listening again...";
+            } catch (err) {
+                document.getElementById("output").innerText = "Security/Execution Error: " + err.message;
+                document.getElementById("status").innerText = "Status: Locked or Error.";
+            }
+        }
+    </script>
+</body>
+</html>

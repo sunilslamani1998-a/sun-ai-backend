@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+torch
+transformers
+moviepy==1.0.3

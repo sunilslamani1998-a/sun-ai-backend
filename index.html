@@ -65,11 +65,13 @@
             msgDiv.className = `message ${sender}`;
             const msgId = 'msg-' + Date.now() + Math.random();
             msgDiv.id = msgId;
+            
             if (sender === 'assistant') {
-                msgDiv.innerHTML = text; // Renders HTML/Images directly
+                msgDiv.innerHTML = text;
             } else {
                 msgDiv.innerText = text;
             }
+            
             chatStream.appendChild(msgDiv);
             chatStream.scrollTop = chatStream.scrollHeight;
             return msgId;
@@ -78,7 +80,7 @@
         function updateMessage(msgId, text) {
             const msgDiv = document.getElementById(msgId);
             if (msgDiv) {
-                msgDiv.innerHTML = text; // Renders HTML/Images directly
+                msgDiv.innerHTML = text; // Force innerHTML to render images properly
                 chatStream.scrollTop = chatStream.scrollHeight;
             }
         }

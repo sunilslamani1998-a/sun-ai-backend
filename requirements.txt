@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 pydantic
-torch
-transformers
-moviepy==1.0.3
+playwright
+beautifulsoup4
+requests
+

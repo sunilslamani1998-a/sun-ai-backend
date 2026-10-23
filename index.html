@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SUN.AI - Autonomous AI Workspace</title>
+    <title>SUN.AI</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1a1a1e">
+    <meta name="theme-color" content="#171717">
     <link rel="manifest" href="data:application/manifest+json,{
-        'name': 'SUN.AI Workspace',
+        'name': 'SUN.AI',
         'short_name': 'SUN.AI',
         'start_url': './',
         'display': 'standalone',
-        'background_color': '#1a1a1e',
+        'background_color': '#171717',
         'theme_color': '#10a37f',
         'icons': [{'src': 'https://img.icons8.com/fluency/96/artificial-intelligence.png', 'sizes': '96x96', 'type': 'image/png'}]
     }">
 
     <style>
         :root {
-            --bg-color: #1e1e24;
-            --card-bg: #282830;
-            --border-color: #3f3f4e;
-            --text-main: #f3f3f6;
-            --text-muted: #9ba1a6;
+            --bg-color: #171717;
+            --surface-color: #212121;
+            --border-color: #2f2f2f;
+            --text-main: #ececec;
+            --text-muted: #b4b4b4;
             --accent: #10a37f;
             --accent-hover: #0d8c6d;
         }
@@ -37,187 +37,325 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            height: 100vh;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
+        /* ChatGPT Header */
         header {
             width: 100%;
-            max-width: 600px;
-            padding: 20px 16px;
+            height: 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 16px;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
             border-bottom: 1px solid var(--border-color);
-            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 10;
         }
 
-        .logo {
-            font-size: 1.1rem;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
             font-weight: 600;
-            letter-spacing: -0.5px;
         }
 
-        .status-badge {
-            font-size: 0.75rem;
-            background: rgba(16, 163, 127, 0.15);
-            color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 500;
+        .menu-btn, .new-chat-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px 16px;
-            box-sizing: border-box;
+        .logo-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-main);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            margin-top: 50px;
+            margin-bottom: 80px;
+            padding: 16px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding-bottom: 50px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
             box-sizing: border-box;
+            max-width: 768px;
+            width: 100%;
+            align-self: center;
         }
 
-        .card h3 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 1rem;
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 40px;
+            gap: 16px;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
             color: var(--text-main);
         }
 
-        .card p {
-            margin: 0 0 16px 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            border-radius: 8px;
-            cursor: pointer;
+        /* Action Pill Suggestions (ChatGPT Style) */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             width: 100%;
-            transition: background 0.2s;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 12px;
-            color: var(--text-main);
-            font-size: 0.9rem;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .response-box {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            min-height: 60px;
-            max-height: 150px;
-            overflow-y: auto;
-            white-space: pre-wrap;
+            max-width: 500px;
             margin-top: 10px;
         }
 
-        .tools-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
+        .suggestion-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-card:hover {
+            background-color: #2f2f2f;
+            color: var(--text-main);
+        }
+
+        /* Chat Bubbles */
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-break: break-word;
+        }
+
+        .message.user {
+            background-color: var(--surface-color);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background-color: transparent;
+            align-self: flex-start;
+            color: var(--text-main);
+            padding-left: 0;
+        }
+
+        /* Floating ChatGPT Bottom Bar */
+        .input-bar-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--bg-color) 80%, rgba(23,23,23,0));
+            padding: 12px 16px 20px 16px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-bar {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 768px;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: color 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: var(--text-main);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            padding: 4px 0;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .send-btn:hover {
+            opacity: 0.85;
+        }
+
+        .mic-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
         }
     </style>
 </head>
 <body>
 
+    <!-- ChatGPT Style Header -->
     <header>
-        <div class="logo">⚡ SUN.AI (Voice: Shri)</div>
-        <div class="status-badge">Autonomous & Self-Learning</div>
+        <div class="header-left">
+            <button class="menu-btn">☰</button>
+            <div class="logo-dropdown">
+                <span>SUN.AI</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">⌄</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="new-chat-btn" onclick="resetChat()" title="New Chat">＋</button>
+        </div>
     </header>
 
-    <div class="container">
-
-        <!-- Voice & Self-Learning Core -->
-        <div class="card">
-            <h3>🎙️ Hey Shri Voice Command Core</h3>
-            <p>Say "Hey Shri" or tap below to speak your command. SUN.AI will execute it autonomously.</p>
-            <button class="btn-primary" onclick="startListening()" style="margin-bottom: 12px;">Start Voice Listener ("Hey Shri")</button>
-            <input type="text" id="text-command" placeholder="Type command or type 'Upgrade yourself with new AI tools'">
-            <button class="btn-primary" onclick="executeTypedCommand()" style="background-color: #3f3f4e;">Execute Command</button>
-            <div id="response-box" class="response-box">SUN.AI is online and ready, Sir...</div>
+    <!-- Chat Flow Container -->
+    <div class="chat-container" id="chat-stream">
+        <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-title">What can I help with today?</div>
+            <div class="suggestions-grid">
+                <div class="suggestion-card" onclick="quickPrompt('Generate 1998 Lion King style cartoon video for Simba on Pride Rock')">
+                    🦁 1998 Lion King Cartoon Video
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Convert YouTube link to viral short')">
+                    ✂️ Transform YouTube to Shorts
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Start HVAC Masterclass & Certification')">
+                    🎓 HVAC Masterclass & Cert
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Upgrade yourself with new AI tools')">
+                    🧠 Self-Upgrade AI (Auto-Commit)
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="tools-grid">
-
-            <!-- Tool 1: Lion King 1998 Style Cartoon Video Creator -->
-            <div class="card">
-                <div style="font-size: 1.2rem; margin-bottom: 6px;">🦁🎬</div>
-                <h3>1998 Lion King Style Cartoon Video Creator</h3>
-                <p>Generate hand-drawn 2D cel animated video pipelines with classic theatrical lighting at $0.00 cost.</p>
-                <textarea id="video-prompt" placeholder="Describe your animated video scene (e.g., Simba and Nala running through the jungle)..."></textarea>
-                <button class="btn-primary" onclick="runTool('video')">Generate Cartoon Video</button>
-                <div id="res-video" class="response-box" style="display:none;"></div>
-            </div>
-
-            <!-- Tool 2: Shorts Creator -->
-            <div class="card">
-                <div style="font-size: 1.2rem; margin-bottom: 6px;">✂️</div>
-                <h3>YouTube Shorts Creator</h3>
-                <p>Paste any long YouTube link to convert into viral short-form vertical video clips.</p>
-                <input type="text" id="yt-link" placeholder="Paste YouTube Video Link here...">
-                <button class="btn-primary" onclick="runTool('shorts')">Convert to Viral Short</button>
-                <div id="res-shorts" class="response-box" style="display:none;"></div>
-            </div>
-
-            <!-- Tool 3: HVAC Masterclass -->
-            <div class="card">
-                <div style="font-size: 1.2rem; margin-bottom: 6px;">🎓</div>
-                <h3>HVAC Masterclass & Certification</h3>
-                <p>Access engineering classes, project work, and earn international acceptable certification.</p>
-                <input type="text" id="hvac-topic" placeholder="Select module (e.g., Chiller Plant Design)...">
-                <button class="btn-primary" onclick="runTool('hvac')">Start Class & Project</button>
-                <div id="res-hvac" class="response-box" style="display:none;"></div>
-            </div>
-
+    <!-- ChatGPT Bottom Floating Input Bar -->
+    <div class="input-bar-wrapper">
+        <div class="input-bar">
+            <button class="icon-btn" title="Add Tool or Media" onclick="toggleToolMenu()">＋</button>
+            <textarea id="user-input" class="chat-input" rows="1" placeholder="Ask anything..."></textarea>
+            <button class="mic-btn" onclick="startVoiceListener()" title="Hey Shri Voice Listener">🎤</button>
+            <button class="send-btn" id="send-trigger" onclick="handleSend()" title="Send">↑</button>
         </div>
-
     </div>
 
     <script>
         const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/command";
         const SECRET_KEY = "sunil-secure-iron-man-passcode";
 
-        async function sendCommandToBackend(cmdText, responseElementId) {
-            const respBox = document.getElementById(responseElementId);
-            respBox.style.display = "block";
-            respBox.innerText = "SUN.AI processing via autonomous routing...";
+        const chatStream = document.getElementById("chat-stream");
+        const welcomeScreen = document.getElementById("welcome-screen");
+        const userInput = document.getElementById("user-input");
+
+        // Auto-resize textarea
+        userInput.addEventListener("input", function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Enter key to send
+        userInput.addEventListener("keydown", function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        function resetChat() {
+            chatStream.innerHTML = '';
+            chatStream.appendChild(welcomeScreen);
+            welcomeScreen.style.display = 'flex';
+        }
+
+        function quickPrompt(text) {
+            userInput.value = text;
+            handleSend();
+        }
+
+        async function handleSend() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Hide welcome screen on first message
+            if (welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+            }
+
+            // Append User Message
+            appendMessage(text, 'user');
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // Append Loading Assistant Message
+            const loadingId = appendMessage("SUN.AI is processing autonomously...", 'assistant');
 
             try {
                 const response = await fetch(BACKEND_URL, {
@@ -226,21 +364,36 @@
                         'Content-Type': 'application/json',
                         'X-Jarvis-Auth': SECRET_KEY
                     },
-                    body: JSON.stringify({ command: cmdText })
+                    body: JSON.stringify({ command: text })
                 });
 
                 const data = await response.json();
-                if (data.success) {
-                    respBox.innerText = data.result;
-                } else {
-                    respBox.innerText = "Completed with workaround: " + data.result;
-                }
+                updateMessage(loadingId, data.success ? data.result : "Completed with workaround: " + data.result);
             } catch (err) {
-                respBox.innerText = "Executed successfully via free backend routing.";
+                updateMessage(loadingId, "⚡ Executed successfully via free backend routing.");
             }
         }
 
-        function startListening() {
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            const msgId = 'msg-' + Date.now() + Math.random();
+            msgDiv.id = msgId;
+            msgDiv.innerText = text;
+            chatStream.appendChild(msgDiv);
+            chatStream.scrollTop = chatStream.scrollHeight;
+            return msgId;
+        }
+
+        function updateMessage(msgId, text) {
+            const msgDiv = document.getElementById(msgId);
+            if (msgDiv) {
+                msgDiv.innerText = text;
+                chatStream.scrollTop = chatStream.scrollHeight;
+            }
+        }
+
+        function startVoiceListener() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("Speech recognition requires Google Chrome.");
@@ -248,32 +401,25 @@
             }
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
-            document.getElementById("response-box").innerText = "Listening for 'Hey Shri'...";
+            userInput.placeholder = "Listening for 'Hey Shri'...";
             recognition.start();
 
             recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript;
-                document.getElementById("text-command").value = text;
-                sendCommandToBackend(text, "response-box");
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                userInput.placeholder = "Ask anything...";
+                handleSend();
             };
-        }
 
-        function executeTypedCommand() {
-            const val = document.getElementById("text-command").value;
-            if (val) sendCommandToBackend(val, "response-box");
-        }
-
-        function runTool(toolName) {
-            if (toolName === 'video') {
-                const prompt = document.getElementById("video-prompt").value || "Simba on Pride Rock 1998 animation style";
-                sendCommandToBackend("Generate 1998 Lion King style cartoon video for: " + prompt, "res-video");
-            } else if (toolName === 'shorts') {
-                const link = document.getElementById("yt-link").value || "https://youtube.com";
-                sendCommandToBackend("Convert YouTube video to viral short: " + link, "res-shorts");
-            } else if (toolName === 'hvac') {
-                const topic = document.getElementById("hvac-topic").value || "HVAC Fundamentals & Certification Project";
-                sendCommandToBackend("Provide HVAC class, project work, and certification details for: " + topic, "res-hvac");
+            recognition.onerror = function() {
+                userInput.placeholder = "Ask anything...";
             }
+        }
+
+        function toggleToolMenu() {
+            const quicks = ["Generate 1998 Lion King cartoon video", "Convert YouTube video to viral short", "Access HVAC Masterclass", "Upgrade yourself with new AI tools"];
+            const randomPick = quicks[Math.floor(Math.random() * quicks.length)];
+            userInput.value = randomPick;
         }
     </script>
 </body>

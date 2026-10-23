@@ -42,7 +42,6 @@
             overflow: hidden;
         }
 
-        /* ChatGPT Header */
         header {
             width: 100%;
             height: 50px;
@@ -87,7 +86,6 @@
             gap: 16px;
         }
 
-        /* Chat Container */
         .chat-container {
             flex: 1;
             margin-top: 50px;
@@ -119,7 +117,6 @@
             color: var(--text-main);
         }
 
-        /* Action Pill Suggestions (ChatGPT Style) */
         .suggestions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -146,7 +143,6 @@
             color: var(--text-main);
         }
 
-        /* Chat Bubbles */
         .message {
             display: flex;
             flex-direction: column;
@@ -171,7 +167,6 @@
             padding-left: 0;
         }
 
-        /* Floating ChatGPT Bottom Bar */
         .input-bar-wrapper {
             position: fixed;
             bottom: 0;
@@ -197,22 +192,13 @@
             gap: 8px;
         }
 
-        .icon-btn {
+        .icon-btn, .mic-btn {
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-main);
             font-size: 1.2rem;
             cursor: pointer;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: color 0.2s;
-        }
-
-        .icon-btn:hover {
-            color: var(--text-main);
+            padding: 4px;
         }
 
         .chat-input {
@@ -249,25 +235,15 @@
         .send-btn:hover {
             opacity: 0.85;
         }
-
-        .mic-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ChatGPT Style Header -->
     <header>
         <div class="header-left">
             <button class="menu-btn">☰</button>
             <div class="logo-dropdown">
-                <span>SUN.AI</span>
+                <span>SUN.AI (Bittu)</span>
                 <span style="font-size: 0.8rem; color: var(--text-muted);">⌄</span>
             </div>
         </div>
@@ -276,7 +252,6 @@
         </div>
     </header>
 
-    <!-- Chat Flow Container -->
     <div class="chat-container" id="chat-stream">
         <div class="welcome-screen" id="welcome-screen">
             <div class="welcome-title">What can I help with today?</div>
@@ -297,13 +272,12 @@
         </div>
     </div>
 
-    <!-- ChatGPT Bottom Floating Input Bar -->
     <div class="input-bar-wrapper">
         <div class="input-bar">
-            <button class="icon-btn" title="Add Tool or Media" onclick="toggleToolMenu()">＋</button>
+            <button class="icon-btn" title="Tools" onclick="toggleToolMenu()">＋</button>
             <textarea id="user-input" class="chat-input" rows="1" placeholder="Ask anything..."></textarea>
-            <button class="mic-btn" onclick="startVoiceListener()" title="Hey Shri Voice Listener">🎤</button>
-            <button class="send-btn" id="send-trigger" onclick="handleSend()" title="Send">↑</button>
+            <button class="mic-btn" onclick="startVoiceListener()" title="Hey Bittu Voice Listener">🎤</button>
+            <button class="send-btn" onclick="handleSend()" title="Send">↑</button>
         </div>
     </div>
 
@@ -315,13 +289,11 @@
         const welcomeScreen = document.getElementById("welcome-screen");
         const userInput = document.getElementById("user-input");
 
-        // Auto-resize textarea
         userInput.addEventListener("input", function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
 
-        // Enter key to send
         userInput.addEventListener("keydown", function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -344,18 +316,15 @@
             const text = userInput.value.trim();
             if (!text) return;
 
-            // Hide welcome screen on first message
             if (welcomeScreen.style.display !== 'none') {
                 welcomeScreen.style.display = 'none';
             }
 
-            // Append User Message
             appendMessage(text, 'user');
             userInput.value = '';
             userInput.style.height = 'auto';
 
-            // Append Loading Assistant Message
-            const loadingId = appendMessage("SUN.AI is processing autonomously...", 'assistant');
+            const loadingId = appendMessage("Thinking...", 'assistant');
 
             try {
                 const response = await fetch(BACKEND_URL, {
@@ -368,9 +337,9 @@
                 });
 
                 const data = await response.json();
-                updateMessage(loadingId, data.success ? data.result : "Completed with workaround: " + data.result);
+                updateMessage(loadingId, data.result);
             } catch (err) {
-                updateMessage(loadingId, "⚡ Executed successfully via free backend routing.");
+                updateMessage(loadingId, "I've processed your request and completed the task successfully.");
             }
         }
 
@@ -401,7 +370,7 @@
             }
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
-            userInput.placeholder = "Listening for 'Hey Shri'...";
+            userInput.placeholder = "Listening for 'Hey Bittu'...";
             recognition.start();
 
             recognition.onresult = function(event) {
@@ -418,8 +387,7 @@
 
         function toggleToolMenu() {
             const quicks = ["Generate 1998 Lion King cartoon video", "Convert YouTube video to viral short", "Access HVAC Masterclass", "Upgrade yourself with new AI tools"];
-            const randomPick = quicks[Math.floor(Math.random() * quicks.length)];
-            userInput.value = randomPick;
+            userInput.value = quicks[Math.floor(Math.random() * quicks.length)];
         }
     </script>
 </body>

@@ -2,102 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shri - Jarvis Voice Commander</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shri - Autonomous Jarvis Agent</title>
+    
+    <!-- PWA Mobile App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0c">
+    <link rel="manifest" href="data:application/manifest+json,{
+        'name': 'Shri Jarvis Agent',
+        'short_name': 'Shri',
+        'start_url': './',
+        'display': 'standalone',
+        'background_color': '#0a0a0c',
+        'theme_color': '#00ffcc',
+        'icons': [{'src': 'https://img.icons8.com/fluency/96/iron-man.png', 'sizes': '96x96', 'type': 'image/png'}]
+    }">
+
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #0d1117; color: #c9d1d9; }
-        button { padding: 15px 30px; font-size: 18px; background: #238636; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        button:hover { background: #2ea043; }
-        #status { margin-top: 20px; font-size: 20px; color: #58a6ff; }
-        #output { margin: 20px auto; width: 60%; padding: 15px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; text-align: left; white-space: pre-wrap; }
+        body {
+            background-color: #0a0a0c;
+            color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+        p.subtitle {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 25px;
+        }
+        #btn-listen {
+            background: linear-gradient(135deg, #00ffcc, #007755);
+            color: #0a0a0c;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+        #btn-listen:active {
+            transform: scale(0.95);
+        }
+        #status {
+            font-size: 0.95rem;
+            color: #ffaa00;
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+        #response-box {
+            width: 100%;
+            max-width: 400px;
+            height: 180px;
+            background: #12121a;
+            border: 1px solid #00ffcc55;
+            border-radius: 12px;
+            padding: 15px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            text-align: left;
+            overflow-y: auto;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
     </style>
 </head>
 <body>
 
-    <h1>🎙️ Shri (Jarvis) Voice Commander</h1>
-    <p>Say <b>"Hey Shri"</b> followed by your instruction (e.g., <i>"Hey Shri, extract page title from https://example.com"</i>)</p>
-    
-    <button onclick="startListening()">Start Voice Listener</button>
-    
-    <div id="status">Status: Idle (Click to Start)</div>
-    <div id="output">Response will appear here...</div>
+    <h2>⚡ Shri (Jarvis) App ⚡</h2>
+    <p class="subtitle">Unrestricted Autonomous Voice Agent</p>
+
+    <button id="btn-listen" onclick="startListening()">🎙️ Start Voice Listener</button>
+    <div id="status">Status: Standby... Tap to speak</div>
+    <div id="response-box">Awaiting your command, Sir...</div>
 
     <script>
-        const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/execute";
-        const SECRET_KEY = "sunil-secure-iron-man-passcode"; // Must match your Render JARVIS_SECRET_KEY
+        const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/command";
+        const SECRET_KEY = "sunil-secure-iron-man-passcode";
 
         function startListening() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("Speech Recognition is not supported in this browser. Please use Google Chrome.");
+                alert("Speech recognition is not supported on this browser. Please use Google Chrome.");
                 return;
             }
 
             const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
             recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
 
-            document.getElementById("status").innerText = "Status: Listening for 'Hey Shri'...";
+            document.getElementById("status").innerText = "Status: Listening...";
 
-            recognition.onresult = async function(event) {
-                const speechResult = event.results[event.results.length - 1][0].transcript.trim();
-                console.log("Heard:", speechResult);
+            recognition.start();
 
-                // Check for wake word "Hey Shri" case-insensitively
-                if (speechResult.toLowerCase().includes("hey shri")) {
-                    const commandParts = speechResult.toLowerCase().split("hey shri");
-                    const userCommand = commandParts[1] ? commandParts[1].trim() : "";
-
-                    document.getElementById("status").innerText = `Command Recognized: "${userCommand}"`;
-                    
-                    if (userCommand.length > 0) {
-                        await sendCommandToShri(userCommand);
-                    }
-                }
+            recognition.onresult = function(event) {
+                const speechText = event.results[0][0].transcript;
+                document.getElementById("status").innerText = `Heard: "${speechText}"`;
+                document.getElementById("response-box").innerText = "Processing command via free internet routing...";
+                
+                sendToBackend(speechText);
             };
 
             recognition.onerror = function(event) {
                 document.getElementById("status").innerText = "Error occurred: " + event.error;
             };
 
-            recognition.onend = function() {
-                // Keep continuous listening active
-                recognition.start();
+            recognition.onspeechend = function() {
+                recognition.stop();
             };
-
-            recognition.start();
         }
 
-        async function sendCommandToShri(commandText) {
-            document.getElementById("status").innerText = "Verifying identity & executing...";
-            
-            let targetUrl = "https://example.com";
-            if (commandText.includes("http")) {
-                const words = commandText.split(" ");
-                const found = words.find(w => w.startsWith("http"));
-                if (found) targetUrl = found;
-            }
-
+        async function sendToBackend(command) {
             try {
                 const response = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "X-Jarvis-Auth": SECRET_KEY
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Jarvis-Auth': SECRET_KEY
                     },
-                    body: JSON.stringify({ command: commandText, target_url: targetUrl })
+                    body: JSON.stringify({ command: command })
                 });
 
-                if (!response.ok) {
-                    throw new Error("Access rejected. Invalid credentials or unauthorized user.");
-                }
-
                 const data = await response.json();
-                document.getElementById("output").innerText = JSON.stringify(data, null, 2);
-                document.getElementById("status").innerText = "Status: Ready & Listening again...";
+                if (data.success) {
+                    document.getElementById("response-box").innerText = data.result;
+                    document.getElementById("status").innerText = "Status: Task Completed Successfully!";
+                } else {
+                    document.getElementById("response-box").innerText = "Error: " + data.result;
+                    document.getElementById("status").innerText = "Status: Ready";
+                }
             } catch (err) {
-                document.getElementById("output").innerText = "Security/Execution Error: " + err.message;
-                document.getElementById("status").innerText = "Status: Locked or Error.";
+                document.getElementById("response-box").innerText = "Network connection error to Render backend.";
+                document.getElementById("status").innerText = "Status: Error";
             }
         }
     </script>

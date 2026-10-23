@@ -4,3 +4,4 @@ pydantic
 playwright
 beautifulsoup4
 requests
+httpx

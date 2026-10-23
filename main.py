@@ -43,7 +43,7 @@ async def execute_autonomous_task(task: TaskRequest):
             
             # Extract details as proof of execution
             page_title = await page.title()
-            page_content = await page.evaluate("document.body.innerText[:1000]")
+            page_content = await page.evaluate("document.body.innerText.slice(0, 1000)")
             
             await browser.close()
             

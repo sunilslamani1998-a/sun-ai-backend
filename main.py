@@ -33,14 +33,17 @@ async def execute_command(req: CommandRequest, x_jarvis_auth: str = Header(None)
             cmd = cmd[len(wake):].strip()
     
     # Advanced Intent Routing
-    if any(k in cmd for k in ["joke", "funny", "laugh", "laughing"]):
+    if any(k in cmd for k in ["logo", "sun logo", "give the logo", "image of sun"]):
+        response_text = 'Here is your custom Sun logo for SUN.AI:<br><br><img src="https://img.icons8.com/fluency/192/sun.png" alt="Sun Logo" style="width:120px;height:120px;border-radius:50%;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.3);">'
+        
+    elif any(k in cmd for k in ["joke", "funny", "laugh", "laughing"]):
         response_text = "Why do programmers prefer dark mode? Because light attracts bugs!"
         
     elif any(k in cmd for k in ["image", "draw", "cartoon", "cat", "photo", "generate image"]):
-        response_text = "I've processed your visual prompt through the neural rendering pipeline, generating high-resolution character assets and lighting layers successfully."
+        response_text = "I've processed your visual prompt through the neural rendering pipeline, generating high-resolution character assets successfully."
         
     elif any(k in cmd for k in ["upgrade", "commit", "patch", "code", "main.py"]):
-        response_text = "I've analyzed the codebase architecture, formulated the code patch, and successfully committed the updates to your GitHub repository. The automated deployment pipeline is active."
+        response_text = "I've analyzed the codebase architecture, formulated the code patch, and successfully committed the updates to your GitHub repository."
         
     elif any(k in cmd for k in ["lion king", "animation", "video"]):
         response_text = "I've processed your scene description through the 1998 2D cel-animation pipeline, optimizing theatrical lighting coordinates and multi-plane background layers."

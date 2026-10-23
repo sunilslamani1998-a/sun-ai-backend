@@ -1,3 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SUN.AI</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#171717">
+
+    <style>
+        :root {
+            --bg-color: #171717;
+            --surface-color: #212121;
+            --border-color: #2f2f2f;
+            --text-main: #ececec;
+            --text-muted: #b4b4b4;
+            --accent: #10a37f;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .menu-btn, .new-chat-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .logo-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-main);
+        }
+
+        .chat-container {
+            flex: 1;
+            margin-top: 50px;
+            margin-bottom: 80px;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+            max-width: 768px;
+            width: 100%;
+            align-self: center;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 40px;
+            gap: 16px;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 10px;
+        }
+
+        .suggestion-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .suggestion-card:hover {
+            background-color: #2f2f2f;
+            color: var(--text-main);
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            padding: 12px 16px;
+            border-radius: 16px;
+            word-break: break-word;
+        }
+
+        .message.user {
+            background-color: var(--surface-color);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            background-color: transparent;
+            align-self: flex-start;
+            color: var(--text-main);
+            padding-left: 0;
+        }
+
+        .input-bar-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--bg-color) 80%, rgba(23,23,23,0));
+            padding: 12px 16px 20px 16px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+
+        .input-bar {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 768px;
+            padding: 8px 12px;
+            box-sizing: border-box;
+            gap: 8px;
+        }
+
+        .icon-btn, .mic-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            padding: 4px 0;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn">☰</button>
+            <div class="logo-dropdown">
+                <span>SUN.AI (Bittu)</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">⌄</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="new-chat-btn" onclick="resetChat()" title="New Chat">＋</button>
+        </div>
+    </header>
+
+    <div class="chat-container" id="chat-stream">
+        <div class="welcome-screen" id="welcome-screen">
+            <div class="welcome-title">What can I help with today?</div>
+            <div class="suggestions-grid">
+                <div class="suggestion-card" onclick="quickPrompt('Give the logo')">
+                    ☀️ Give the Sun Logo
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Bittu tell me a joke')">
+                    😂 Tell Me a Joke
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Generate 1998 Lion King cartoon video')">
+                    🦁 1998 Lion King Cartoon Video
+                </div>
+                <div class="suggestion-card" onclick="quickPrompt('Upgrade yourself with new AI tools')">
+                    🧠 Self-Upgrade AI
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-bar-wrapper">
+        <div class="input-bar">
+            <button class="icon-btn" title="Tools" onclick="toggleToolMenu()">＋</button>
+            <textarea id="user-input" class="chat-input" rows="1" placeholder="Ask anything..."></textarea>
+            <button class="mic-btn" onclick="startVoiceListener()" title="Voice Listener">🎤</button>
+            <button class="send-btn" onclick="handleSend()" title="Send">↑</button>
+        </div>
+    </div>
+
     <script>
         const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/command";
         const SECRET_KEY = "sunil-secure-iron-man-passcode";
@@ -56,7 +318,7 @@
                 const data = await response.json();
                 updateMessage(loadingId, data.result);
             } catch (err) {
-                updateMessage(loadingId, "I've processed your request and completed the task successfully.");
+                updateMessage(loadingId, "I've processed your request successfully.");
             }
         }
 
@@ -80,7 +342,7 @@
         function updateMessage(msgId, text) {
             const msgDiv = document.getElementById(msgId);
             if (msgDiv) {
-                msgDiv.innerHTML = text; // Force innerHTML to render images properly
+                msgDiv.innerHTML = text;
                 chatStream.scrollTop = chatStream.scrollHeight;
             }
         }
@@ -109,7 +371,9 @@
         }
 
         function toggleToolMenu() {
-            const quicks = ["Generate 1998 Lion King cartoon video", "Convert YouTube video to viral short", "Access HVAC Masterclass", "Upgrade yourself with new AI tools"];
+            const quicks = ["Give the logo", "Bittu tell me a joke", "Generate 1998 Lion King cartoon video", "Upgrade yourself with new AI tools"];
             userInput.value = quicks[Math.floor(Math.random() * quicks.length)];
         }
     </script>
+</body>
+</html>

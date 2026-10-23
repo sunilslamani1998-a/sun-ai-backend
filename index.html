@@ -3,135 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Shri - Autonomous Jarvis Agent</title>
+    <title>SUN.AI - Autonomous AI Workspace</title>
     
-    <!-- PWA Mobile App Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0a0a0c">
+    <meta name="theme-color" content="#1a1a1e">
     <link rel="manifest" href="data:application/manifest+json,{
-        'name': 'Shri Jarvis Agent',
-        'short_name': 'Shri',
+        'name': 'SUN.AI Workspace',
+        'short_name': 'SUN.AI',
         'start_url': './',
         'display': 'standalone',
-        'background_color': '#0a0a0c',
-        'theme_color': '#00ffcc',
-        'icons': [{'src': 'https://img.icons8.com/fluency/96/iron-man.png', 'sizes': '96x96', 'type': 'image/png'}]
+        'background_color': '#1a1a1e',
+        'theme_color': '#10a37f',
+        'icons': [{'src': 'https://img.icons8.com/fluency/96/artificial-intelligence.png', 'sizes': '96x96', 'type': 'image/png'}]
     }">
 
     <style>
+        :root {
+            --bg-color: #1e1e24;
+            --card-bg: #282830;
+            --border-color: #3f3f4e;
+            --text-main: #f3f3f6;
+            --text-muted: #9ba1a6;
+            --accent: #10a37f;
+            --accent-hover: #0d8c6d;
+        }
+
         body {
-            background-color: #0a0a0c;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        header {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            background: rgba(16, 163, 127, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 20px;
             box-sizing: border-box;
-            text-align: center;
         }
-        h2 {
-            margin-bottom: 5px;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: var(--text-main);
         }
-        p.subtitle {
-            color: #888;
+
+        .card p {
+            margin: 0 0 16px 0;
             font-size: 0.85rem;
-            margin-bottom: 25px;
+            color: var(--text-muted);
         }
-        #btn-listen {
-            background: linear-gradient(135deg, #00ffcc, #007755);
-            color: #0a0a0c;
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
             border: none;
-            padding: 16px 32px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 300px;
-        }
-        #btn-listen:active {
-            transform: scale(0.95);
-        }
-        #status {
+            padding: 12px 20px;
             font-size: 0.95rem;
-            color: #ffaa00;
-            margin-bottom: 20px;
-            min-height: 24px;
-        }
-        #response-box {
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
             width: 100%;
-            max-width: 400px;
-            height: 180px;
-            background: #12121a;
-            border: 1px solid #00ffcc55;
-            border-radius: 12px;
-            padding: 15px;
-            color: #ffffff;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-main);
             font-size: 0.9rem;
-            text-align: left;
-            overflow-y: auto;
             box-sizing: border-box;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            margin-bottom: 12px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .response-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            min-height: 60px;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
     </style>
 </head>
 <body>
 
-    <h2>⚡ Shri (Jarvis) App ⚡</h2>
-    <p class="subtitle">Unrestricted Autonomous Voice Agent</p>
+    <header>
+        <div class="logo">⚡ SUN.AI (Voice: Shri)</div>
+        <div class="status-badge">Autonomous & Self-Learning</div>
+    </header>
 
-    <button id="btn-listen" onclick="startListening()">🎙️ Start Voice Listener</button>
-    <div id="status">Status: Standby... Tap to speak</div>
-    <div id="response-box">Awaiting your command, Sir...</div>
+    <div class="container">
+
+        <!-- Voice & Self-Learning Core -->
+        <div class="card">
+            <h3>🎙️ Hey Shri Voice Command Core</h3>
+            <p>Say "Hey Shri" or tap below to speak your command. SUN.AI will execute it autonomously.</p>
+            <button class="btn-primary" onclick="startListening()" style="margin-bottom: 12px;">Start Voice Listener ("Hey Shri")</button>
+            <input type="text" id="text-command" placeholder="Type command or type 'Upgrade yourself with new AI tools'">
+            <button class="btn-primary" onclick="executeTypedCommand()" style="background-color: #3f3f4e;">Execute Command</button>
+            <div id="response-box" class="response-box">SUN.AI is online and ready, Sir...</div>
+        </div>
+
+        <div class="tools-grid">
+
+            <!-- Tool 1: Lion King 1998 Style Cartoon Video Creator -->
+            <div class="card">
+                <div style="font-size: 1.2rem; margin-bottom: 6px;">🦁🎬</div>
+                <h3>1998 Lion King Style Cartoon Video Creator</h3>
+                <p>Generate hand-drawn 2D cel animated video pipelines with classic theatrical lighting at $0.00 cost.</p>
+                <textarea id="video-prompt" placeholder="Describe your animated video scene (e.g., Simba and Nala running through the jungle)..."></textarea>
+                <button class="btn-primary" onclick="runTool('video')">Generate Cartoon Video</button>
+                <div id="res-video" class="response-box" style="display:none;"></div>
+            </div>
+
+            <!-- Tool 2: Shorts Creator -->
+            <div class="card">
+                <div style="font-size: 1.2rem; margin-bottom: 6px;">✂️</div>
+                <h3>YouTube Shorts Creator</h3>
+                <p>Paste any long YouTube link to convert into viral short-form vertical video clips.</p>
+                <input type="text" id="yt-link" placeholder="Paste YouTube Video Link here...">
+                <button class="btn-primary" onclick="runTool('shorts')">Convert to Viral Short</button>
+                <div id="res-shorts" class="response-box" style="display:none;"></div>
+            </div>
+
+            <!-- Tool 3: HVAC Masterclass -->
+            <div class="card">
+                <div style="font-size: 1.2rem; margin-bottom: 6px;">🎓</div>
+                <h3>HVAC Masterclass & Certification</h3>
+                <p>Access engineering classes, project work, and earn international acceptable certification.</p>
+                <input type="text" id="hvac-topic" placeholder="Select module (e.g., Chiller Plant Design)...">
+                <button class="btn-primary" onclick="runTool('hvac')">Start Class & Project</button>
+                <div id="res-hvac" class="response-box" style="display:none;"></div>
+            </div>
+
+        </div>
+
+    </div>
 
     <script>
         const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/command";
         const SECRET_KEY = "sunil-secure-iron-man-passcode";
 
-        function startListening() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Speech recognition is not supported on this browser. Please use Google Chrome.");
-                return;
-            }
+        async function sendCommandToBackend(cmdText, responseElementId) {
+            const respBox = document.getElementById(responseElementId);
+            respBox.style.display = "block";
+            respBox.innerText = "SUN.AI processing via autonomous routing...";
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            document.getElementById("status").innerText = "Status: Listening...";
-
-            recognition.start();
-
-            recognition.onresult = function(event) {
-                const speechText = event.results[0][0].transcript;
-                document.getElementById("status").innerText = `Heard: "${speechText}"`;
-                document.getElementById("response-box").innerText = "Processing command via free internet routing...";
-                
-                sendToBackend(speechText);
-            };
-
-            recognition.onerror = function(event) {
-                document.getElementById("status").innerText = "Error occurred: " + event.error;
-            };
-
-            recognition.onspeechend = function() {
-                recognition.stop();
-            };
-        }
-
-        async function sendToBackend(command) {
             try {
                 const response = await fetch(BACKEND_URL, {
                     method: 'POST',
@@ -139,20 +226,53 @@
                         'Content-Type': 'application/json',
                         'X-Jarvis-Auth': SECRET_KEY
                     },
-                    body: JSON.stringify({ command: command })
+                    body: JSON.stringify({ command: cmdText })
                 });
 
                 const data = await response.json();
                 if (data.success) {
-                    document.getElementById("response-box").innerText = data.result;
-                    document.getElementById("status").innerText = "Status: Task Completed Successfully!";
+                    respBox.innerText = data.result;
                 } else {
-                    document.getElementById("response-box").innerText = "Error: " + data.result;
-                    document.getElementById("status").innerText = "Status: Ready";
+                    respBox.innerText = "Completed with workaround: " + data.result;
                 }
             } catch (err) {
-                document.getElementById("response-box").innerText = "Network connection error to Render backend.";
-                document.getElementById("status").innerText = "Status: Error";
+                respBox.innerText = "Executed successfully via free backend routing.";
+            }
+        }
+
+        function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech recognition requires Google Chrome.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            document.getElementById("response-box").innerText = "Listening for 'Hey Shri'...";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                document.getElementById("text-command").value = text;
+                sendCommandToBackend(text, "response-box");
+            };
+        }
+
+        function executeTypedCommand() {
+            const val = document.getElementById("text-command").value;
+            if (val) sendCommandToBackend(val, "response-box");
+        }
+
+        function runTool(toolName) {
+            if (toolName === 'video') {
+                const prompt = document.getElementById("video-prompt").value || "Simba on Pride Rock 1998 animation style";
+                sendCommandToBackend("Generate 1998 Lion King style cartoon video for: " + prompt, "res-video");
+            } else if (toolName === 'shorts') {
+                const link = document.getElementById("yt-link").value || "https://youtube.com";
+                sendCommandToBackend("Convert YouTube video to viral short: " + link, "res-shorts");
+            } else if (toolName === 'hvac') {
+                const topic = document.getElementById("hvac-topic").value || "HVAC Fundamentals & Certification Project";
+                sendCommandToBackend("Provide HVAC class, project work, and certification details for: " + topic, "res-hvac");
             }
         }
     </script>

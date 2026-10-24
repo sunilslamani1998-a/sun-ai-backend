@@ -1,379 +1,382 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SUN.AI</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#171717">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <title>SUNAI | Task Manager</title>
 
-    <style>
-        :root {
-            --bg-color: #171717;
-            --surface-color: #212121;
-            --border-color: #2f2f2f;
-            --text-main: #ececec;
-            --text-muted: #b4b4b4;
-            --accent: #10a37f;
-        }
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1120;
+      --panel: #141e30;
+      --border: #29364b;
+      --text: #edf2ff;
+      --muted: #a5b2c9;
+      --accent: #7c9cff;
+      --green: #50d6a1;
+      --red: #ff7777;
+    }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
+    * { box-sizing: border-box; }
 
-        header {
-            width: 100%;
-            height: 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 16px;
-            box-sizing: border-box;
-            background-color: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            position: fixed;
-            top: 0;
-            z-index: 10;
-        }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.05rem;
-            font-weight: 600;
-        }
+    main { max-width: 1000px; margin: auto; }
 
-        .menu-btn, .new-chat-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
+    header { margin-bottom: 24px; }
 
-        .logo-dropdown {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--text-main);
-        }
+    h1 { margin: 0; font-size: 32px; letter-spacing: 1px; }
+    h2 { font-size: 18px; margin-top: 0; }
+    p { line-height: 1.5; }
+    .muted { color: var(--muted); font-size: 14px; }
 
-        .chat-container {
-            flex: 1;
-            margin-top: 50px;
-            margin-bottom: 80px;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-sizing: border-box;
-            max-width: 768px;
-            width: 100%;
-            align-self: center;
-        }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
 
-        .welcome-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            margin-top: 40px;
-            gap: 16px;
-        }
+    label {
+      display: block;
+      font-size: 14px;
+      margin: 14px 0 7px;
+    }
 
-        .welcome-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
+    input, textarea, select {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      color: var(--text);
+      background: #0b1425;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+    }
 
-        .suggestions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            max-width: 500px;
-            margin-top: 10px;
-        }
+    textarea { resize: vertical; min-height: 90px; }
 
-        .suggestion-card {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+    button {
+      padding: 10px 14px;
+      margin: 10px 6px 0 0;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #081020;
+      font-weight: 650;
+      cursor: pointer;
+    }
 
-        .suggestion-card:hover {
-            background-color: #2f2f2f;
-            color: var(--text-main);
-        }
+    button.secondary {
+      background: #34445f;
+      color: white;
+    }
 
-        .message {
-            display: flex;
-            flex-direction: column;
-            max-width: 85%;
-            line-height: 1.5;
-            font-size: 0.95rem;
-            padding: 12px 16px;
-            border-radius: 16px;
-            word-break: break-word;
-        }
+    button.danger {
+      background: #632b38;
+      color: white;
+    }
 
-        .message.user {
-            background-color: var(--surface-color);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
+    button:disabled { opacity: .5; cursor: not-allowed; }
 
-        .message.assistant {
-            background-color: transparent;
-            align-self: flex-start;
-            color: var(--text-main);
-            padding-left: 0;
-        }
+    .status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: #34445f;
+    }
 
-        .input-bar-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to top, var(--bg-color) 80%, rgba(23,23,23,0));
-            padding: 12px 16px 20px 16px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: center;
-        }
+    .status.completed { color: var(--green); }
+    .status.failed, .status.cancelled { color: var(--red); }
+    .status.running { color: #ffd479; }
 
-        .input-bar {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 26px;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            max-width: 768px;
-            padding: 8px 12px;
-            box-sizing: border-box;
-            gap: 8px;
-        }
+    .task {
+      border-top: 1px solid var(--border);
+      padding: 16px 0;
+      overflow-wrap: anywhere;
+    }
 
-        .icon-btn, .mic-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-        }
+    .task:first-child { border-top: 0; }
+    .task h3 { margin: 0 0 8px; font-size: 16px; }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      padding: 12px;
+      border-radius: 8px;
+      background: #080e19;
+      font-size: 13px;
+    }
 
-        .chat-input {
-            flex: 1;
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            outline: none;
-            resize: none;
-            max-height: 120px;
-            padding: 4px 0;
-        }
+    .message { margin-top: 12px; color: var(--muted); }
+    .error { color: var(--red); }
+    .success { color: var(--green); }
 
-        .chat-input::placeholder {
-            color: var(--text-muted);
-        }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
 
-        .send-btn {
-            background-color: var(--text-main);
-            color: var(--bg-color);
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+    @media (max-width: 600px) {
+      body { padding: 16px 10px; }
+      .panel { padding: 15px; }
+      h1 { font-size: 27px; }
+    }
+  </style>
 </head>
+
 <body>
+<main>
+  <header>
+    <h1>SUNAI</h1>
+    <p class="muted">AI task management dashboard</p>
+    <span id="connection" class="status">Checking API...</span>
+  </header>
 
-    <header>
-        <div class="header-left">
-            <button class="menu-btn">☰</button>
-            <div class="logo-dropdown">
-                <span>SUN.AI (Bittu)</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">⌄</span>
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="new-chat-btn" onclick="resetChat()" title="New Chat">＋</button>
-        </div>
-    </header>
+  <section class="panel">
+    <h2>Create a task</h2>
 
-    <div class="chat-container" id="chat-stream">
-        <div class="welcome-screen" id="welcome-screen">
-            <div class="welcome-title">What can I help with today?</div>
-            <div class="suggestions-grid">
-                <div class="suggestion-card" onclick="quickPrompt('Give the logo')">
-                    ☀️ Give the Sun Logo
-                </div>
-                <div class="suggestion-card" onclick="quickPrompt('Bittu tell me a joke')">
-                    😂 Tell Me a Joke
-                </div>
-                <div class="suggestion-card" onclick="quickPrompt('Generate 1998 Lion King cartoon video')">
-                    🦁 1998 Lion King Cartoon Video
-                </div>
-                <div class="suggestion-card" onclick="quickPrompt('Upgrade yourself with new AI tools')">
-                    🧠 Self-Upgrade AI
-                </div>
-            </div>
-        </div>
+    <form id="taskForm">
+      <label for="goal">Task goal</label>
+      <textarea id="goal" maxlength="10000" required
+        placeholder="Example: Create an HVAC plan for a small house"></textarea>
+
+      <label for="requirements">Requirements</label>
+      <textarea id="requirements" maxlength="20000"
+        placeholder="Describe the expected output and constraints"></textarea>
+
+      <label for="attempts">Maximum attempts</label>
+      <select id="attempts">
+        <option value="1">1 attempt</option>
+        <option value="2">2 attempts</option>
+        <option value="3" selected>3 attempts</option>
+        <option value="4">4 attempts</option>
+        <option value="5">5 attempts</option>
+      </select>
+
+      <button id="createButton" type="submit">Create task</button>
+      <p id="formMessage" class="message" role="status"></p>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="topline">
+      <h2>Tasks</h2>
+      <button class="secondary" id="refreshButton" type="button">
+        Refresh
+      </button>
     </div>
 
-    <div class="input-bar-wrapper">
-        <div class="input-bar">
-            <button class="icon-btn" title="Tools" onclick="toggleToolMenu()">＋</button>
-            <textarea id="user-input" class="chat-input" rows="1" placeholder="Ask anything..."></textarea>
-            <button class="mic-btn" onclick="startVoiceListener()" title="Voice Listener">🎤</button>
-            <button class="send-btn" onclick="handleSend()" title="Send">↑</button>
-        </div>
-    </div>
+    <p class="muted">
+      Task status updates automatically every five seconds.
+    </p>
 
-    <script>
-        const BACKEND_URL = "https://sun-ai-backend-117f.onrender.com/command";
-        const SECRET_KEY = "sunil-secure-iron-man-passcode";
+    <div id="tasks" aria-live="polite">Loading tasks...</div>
+    <p id="listMessage" class="message" role="status"></p>
+  </section>
+</main>
 
-        const chatStream = document.getElementById("chat-stream");
-        const welcomeScreen = document.getElementById("welcome-screen");
-        const userInput = document.getElementById("user-input");
+<script>
+  // Change this when your API is hosted at another address.
+  const API_BASE = "http://127.0.0.1:8000";
 
-        userInput.addEventListener("input", function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
+  const tasksElement = document.getElementById("tasks");
+  const connectionElement = document.getElementById("connection");
+  const formMessage = document.getElementById("formMessage");
+  const listMessage = document.getElementById("listMessage");
+  const createButton = document.getElementById("createButton");
 
-        userInput.addEventListener("keydown", function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-            }
-        });
+  let loadingTasks = false;
 
-        function resetChat() {
-            chatStream.innerHTML = '';
-            chatStream.appendChild(welcomeScreen);
-            welcomeScreen.style.display = 'flex';
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  async function api(path, options = {}) {
+    const response = await fetch(API_BASE + path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      }
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || `Request failed (${response.status})`
+      );
+    }
+
+    return data;
+  }
+
+  async function checkConnection() {
+    try {
+      await api("/health");
+      connectionElement.textContent = "API connected";
+      connectionElement.className = "status completed";
+    } catch {
+      connectionElement.textContent = "API unavailable";
+      connectionElement.className = "status failed";
+    }
+  }
+
+  function renderTask(task) {
+    const card = element("article", "task");
+    const title = element("h3", "", task.goal);
+    const status = element("span", "status " + task.status, task.status);
+
+    card.append(title, status);
+
+    card.appendChild(element(
+      "p", "muted",
+      `ID: ${task.id}`
+    ));
+
+    card.appendChild(element(
+      "p", "",
+      `Progress: ${task.progress || "Not started"}`
+    ));
+
+    card.appendChild(element(
+      "p", "muted",
+      `Attempts: ${task.attempts}/${task.max_attempts}`
+    ));
+
+    if (task.requirements) {
+      const details = element("details");
+      details.appendChild(element("summary", "", "Requirements"));
+      details.appendChild(element("p", "", task.requirements));
+      card.appendChild(details);
+    }
+
+    if (task.result) {
+      const details = element("details");
+      details.appendChild(element("summary", "", "View result"));
+      details.appendChild(element("pre", "", task.result));
+      card.appendChild(details);
+    }
+
+    if (task.error) {
+      card.appendChild(element("p", "error", "Error: " + task.error));
+    }
+
+    if (task.status === "queued" || task.status === "running") {
+      const cancelButton = element("button", "danger", "Cancel task");
+      cancelButton.type = "button";
+
+      cancelButton.addEventListener("click", async () => {
+        cancelButton.disabled = true;
+
+        try {
+          await api(`/tasks/${encodeURIComponent(task.id)}/cancel`, {
+            method: "POST"
+          });
+          listMessage.textContent = "Cancellation requested.";
+          listMessage.className = "message success";
+          await loadTasks();
+        } catch (error) {
+          listMessage.textContent = error.message;
+          listMessage.className = "message error";
+          cancelButton.disabled = false;
         }
+      });
 
-        function quickPrompt(text) {
-            userInput.value = text;
-            handleSend();
-        }
+      card.appendChild(cancelButton);
+    }
 
-        async function handleSend() {
-            const text = userInput.value.trim();
-            if (!text) return;
+    return card;
+  }
 
-            if (welcomeScreen.style.display !== 'none') {
-                welcomeScreen.style.display = 'none';
-            }
+  async function loadTasks() {
+    if (loadingTasks) return;
+    loadingTasks = true;
 
-            appendMessage(text, 'user');
-            userInput.value = '';
-            userInput.style.height = 'auto';
+    try {
+      const tasks = await api("/tasks?limit=50&offset=0");
+      tasksElement.replaceChildren();
 
-            const loadingId = appendMessage("Thinking...", 'assistant');
+      if (!Array.isArray(tasks) || tasks.length === 0) {
+        tasksElement.appendChild(
+          element("p", "muted", "No tasks yet. Create your first task.")
+        );
+      } else {
+        tasks.forEach(task => tasksElement.appendChild(renderTask(task)));
+      }
 
-            try {
-                const response = await fetch(BACKEND_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Jarvis-Auth': SECRET_KEY
-                    },
-                    body: JSON.stringify({ command: text })
-                });
+      listMessage.textContent = "";
+      connectionElement.textContent = "API connected";
+      connectionElement.className = "status completed";
+    } catch (error) {
+      listMessage.textContent = error.message;
+      listMessage.className = "message error";
+      connectionElement.textContent = "API unavailable";
+      connectionElement.className = "status failed";
+    } finally {
+      loadingTasks = false;
+    }
+  }
 
-                const data = await response.json();
-                updateMessage(loadingId, data.result);
-            } catch (err) {
-                updateMessage(loadingId, "I've processed your request successfully.");
-            }
-        }
+  document.getElementById("taskForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    createButton.disabled = true;
+    formMessage.textContent = "Creating task...";
+    formMessage.className = "message";
 
-        function appendMessage(text, sender) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-            const msgId = 'msg-' + Date.now() + Math.random();
-            msgDiv.id = msgId;
-            
-            if (sender === 'assistant') {
-                msgDiv.innerHTML = text;
-            } else {
-                msgDiv.innerText = text;
-            }
-            
-            chatStream.appendChild(msgDiv);
-            chatStream.scrollTop = chatStream.scrollHeight;
-            return msgId;
-        }
+    const payload = {
+      goal: document.getElementById("goal").value.trim(),
+      requirements: document.getElementById("requirements").value.trim(),
+      max_attempts: Number(document.getElementById("attempts").value)
+    };
 
-        function updateMessage(msgId, text) {
-            const msgDiv = document.getElementById(msgId);
-            if (msgDiv) {
-                msgDiv.innerHTML = text;
-                chatStream.scrollTop = chatStream.scrollHeight;
-            }
-        }
+    try {
+      const task = await api("/tasks", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
 
-        function startVoiceListener() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Speech recognition requires Google Chrome.");
-                return;
-            }
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            userInput.placeholder = "Listening for 'Bittu'...";
-            recognition.start();
+      formMessage.textContent = `Task created: ${task.id}`;
+      formMessage.className = "message success";
+      document.getElementById("goal").value = "";
+      document.getElementById("requirements").value = "";
 
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                userInput.value = transcript;
-                userInput.placeholder = "Ask anything...";
-                handleSend();
-            };
+      await loadTasks();
+    } catch (error) {
+      formMessage.textContent = error.message;
+      formMessage.className = "message error";
+    } finally {
+      createButton.disabled = false;
+    }
+  });
 
-            recognition.onerror = function() {
-                userInput.placeholder = "Ask anything...";
-            }
-        }
+  document.getElementById("refreshButton").addEventListener(
+    "click", loadTasks
+  );
 
-        function toggleToolMenu() {
-            const quicks = ["Give the logo", "Bittu tell me a joke", "Generate 1998 Lion King cartoon video", "Upgrade yourself with new AI tools"];
-            userInput.value = quicks[Math.floor(Math.random() * quicks.length)];
-        }
-    </script>
+  checkConnection();
+  loadTasks();
+  setInterval(() => {
+    checkConnection();
+    loadTasks();
+  }, 5000);
+</script>
 </body>
 </html>

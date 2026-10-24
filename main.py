@@ -33,10 +33,14 @@ async def execute_command(req: CommandRequest, x_jarvis_auth: str = Header(None)
         if cmd.startswith(wake):
             cmd = cmd[len(wake):].strip()
     
-    # Advanced Intent Routing & Dynamic Free AI Generation
-    if any(k in cmd for k in ["image", "draw", "generate", "create", "photo", "logo", "realistic", "painting", "picture"]):
-        # Dynamically create the image on the fly using a free online AI generation platform based on user prompt
-        prompt_encoded = urllib.parse.quote(cmd)
+    # Advanced Intent Routing & Enhanced Dynamic AI Generation
+    if any(k in cmd for k in ["image", "draw", "generate", "create", "photo", "logo", "realistic", "painting", "picture", "cartoon", "cat"]):
+        # Automatically enhance prompts for cartoons and cats so faces render clearly and correctly
+        prompt_text = req.command
+        if "cat" in cmd or "cartoon" in cmd:
+            prompt_text = f"cute cartoon cat with a clear, visible, happy face, vibrant colors, clean lines, vector illustration, high resolution, {req.command}"
+        
+        prompt_encoded = urllib.parse.quote(prompt_text)
         response_text = f'Generated via SUN.AI neural generation core:<br><br><img src="https://image.pollinations.ai/prompt/{prompt_encoded}?width=512&height=512&nologo=true" alt="{req.command}" style="width:100%;max-width:300px;border-radius:12px;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.5);">'
         
     elif any(k in cmd for k in ["joke", "funny", "laugh", "laughing"]):

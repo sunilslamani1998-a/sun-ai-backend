@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import urllib.parse
 import os
 
 app = FastAPI()
@@ -32,15 +33,14 @@ async def execute_command(req: CommandRequest, x_jarvis_auth: str = Header(None)
         if cmd.startswith(wake):
             cmd = cmd[len(wake):].strip()
     
-    # Advanced Intent Routing
-    if any(k in cmd for k in ["logo", "sun logo", "give the logo", "image of sun"]):
-        response_text = 'Here is your custom Sun logo for SUN.AI:<br><br><img src="https://img.icons8.com/fluency/192/sun.png" alt="Sun Logo" style="width:120px;height:120px;border-radius:50%;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.3);">'
+    # Advanced Intent Routing & Dynamic Free AI Generation
+    if any(k in cmd for k in ["image", "draw", "generate", "create", "photo", "logo", "realistic", "painting", "picture"]):
+        # Dynamically create the image on the fly using a free online AI generation platform based on user prompt
+        prompt_encoded = urllib.parse.quote(cmd)
+        response_text = f'Generated via SUN.AI neural generation core:<br><br><img src="https://image.pollinations.ai/prompt/{prompt_encoded}?width=512&height=512&nologo=true" alt="{req.command}" style="width:100%;max-width:300px;border-radius:12px;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.5);">'
         
     elif any(k in cmd for k in ["joke", "funny", "laugh", "laughing"]):
         response_text = "Why do programmers prefer dark mode? Because light attracts bugs!"
-        
-    elif any(k in cmd for k in ["image", "draw", "cartoon", "cat", "photo", "generate image"]):
-        response_text = "I've processed your visual prompt through the neural rendering pipeline, generating high-resolution character assets successfully."
         
     elif any(k in cmd for k in ["upgrade", "commit", "patch", "code", "main.py"]):
         response_text = "I've analyzed the codebase architecture, formulated the code patch, and successfully committed the updates to your GitHub repository."

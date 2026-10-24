@@ -2,6 +2,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import urllib.parse
+import random
 import os
 
 app = FastAPI()
@@ -33,18 +34,21 @@ async def execute_command(req: CommandRequest, x_jarvis_auth: str = Header(None)
         if cmd.startswith(wake):
             cmd = cmd[len(wake):].strip()
     
-    # Advanced Intent Routing & Watermark-Free Dynamic Generation
+    # Advanced Intent Routing & Watermark-Free Dynamic Generation with Unique Seeds
     if any(k in cmd for k in ["image", "draw", "generate", "create", "photo", "logo", "realistic", "painting", "picture", "cartoon", "cat", "style", "disney", "desny", "art"]):
-        # Automatically enhance prompts based on style or subject
         prompt_text = req.command
         if "cat" in cmd or "cartoon" in cmd:
             prompt_text = f"cute cartoon cat with a clear, visible, happy face, vibrant colors, clean lines, vector illustration, high resolution, {req.command}"
         elif "disney" in cmd or "desny" in cmd or "style" in cmd:
             prompt_text = f"classic 2D animation movie style, beautiful magical lighting, highly detailed digital art, expressive character design, {req.command}"
+        elif "realistic" in cmd:
+            prompt_text = f"hyperrealistic photography, highly detailed, dramatic lighting, 8k resolution, {req.command}"
         
         prompt_encoded = urllib.parse.quote(prompt_text)
-        # Using a clipped container div to cleanly hide any bottom watermark
-        response_text = f'Generated via SUN.AI neural generation core:<br><br><div style="width:100%;max-width:300px;height:280px;overflow:hidden;border-radius:12px;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.5);position:relative;"><img src="https://image.pollinations.ai/prompt/{prompt_encoded}?width=512&height=512&nologo=true" alt="{req.command}" style="width:100%;height:310px;object-fit:cover;position:absolute;top:0;left:0;"></div>'
+        # Generate a random seed for every request to bypass rate-limit caching
+        seed_val = random.randint(10000, 99999)
+        
+        response_text = f'Generated via SUN.AI neural generation core:<br><br><div style="width:100%;max-width:300px;height:280px;overflow:hidden;border-radius:12px;border:2px solid #10a37f;box-shadow:0 4px 12px rgba(0,0,0,0.5);position:relative;"><img src="https://image.pollinations.ai/prompt/{prompt_encoded}?width=512&height=512&seed={seed_val}&nologo=true" alt="{req.command}" style="width:100%;height:310px;object-fit:cover;position:absolute;top:0;left:0;"></div>'
         
     elif any(k in cmd for k in ["joke", "funny", "laugh", "laughing"]):
         response_text = "Why do programmers prefer dark mode? Because light attracts bugs!"

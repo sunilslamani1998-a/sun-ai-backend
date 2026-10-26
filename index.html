@@ -1,382 +1,99 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101827">
-  <title>SUNAI | Task Manager</title>
-
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b1120;
-      --panel: #141e30;
-      --border: #29364b;
-      --text: #edf2ff;
-      --muted: #a5b2c9;
-      --accent: #7c9cff;
-      --green: #50d6a1;
-      --red: #ff7777;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 24px 16px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    main { max-width: 1000px; margin: auto; }
-
-    header { margin-bottom: 24px; }
-
-    h1 { margin: 0; font-size: 32px; letter-spacing: 1px; }
-    h2 { font-size: 18px; margin-top: 0; }
-    p { line-height: 1.5; }
-    .muted { color: var(--muted); font-size: 14px; }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      margin: 14px 0 7px;
-    }
-
-    input, textarea, select {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      color: var(--text);
-      background: #0b1425;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: inherit;
-    }
-
-    textarea { resize: vertical; min-height: 90px; }
-
-    button {
-      padding: 10px 14px;
-      margin: 10px 6px 0 0;
-      border: 0;
-      border-radius: 8px;
-      background: var(--accent);
-      color: #081020;
-      font-weight: 650;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #34445f;
-      color: white;
-    }
-
-    button.danger {
-      background: #632b38;
-      color: white;
-    }
-
-    button:disabled { opacity: .5; cursor: not-allowed; }
-
-    .status {
-      display: inline-block;
-      padding: 4px 9px;
-      border-radius: 20px;
-      font-size: 12px;
-      background: #34445f;
-    }
-
-    .status.completed { color: var(--green); }
-    .status.failed, .status.cancelled { color: var(--red); }
-    .status.running { color: #ffd479; }
-
-    .task {
-      border-top: 1px solid var(--border);
-      padding: 16px 0;
-      overflow-wrap: anywhere;
-    }
-
-    .task:first-child { border-top: 0; }
-    .task h3 { margin: 0 0 8px; font-size: 16px; }
-    pre {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      padding: 12px;
-      border-radius: 8px;
-      background: #080e19;
-      font-size: 13px;
-    }
-
-    .message { margin-top: 12px; color: var(--muted); }
-    .error { color: var(--red); }
-    .success { color: var(--green); }
-
-    .topline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 16px 10px; }
-      .panel { padding: 15px; }
-      h1 { font-size: 27px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUN.AI Advanced Agent</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #38bdf8; --border: #334155; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        textarea { width: 100%; height: 100px; background: #090d16; border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; resize: vertical; font-size: 1rem; box-sizing: border-box; }
+        button { background: var(--accent); color: #0f172a; border: none; padding: 10px 20px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        pre { background: #090d16; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); font-size: 0.9rem; }
+        .patch-box { background: #1b263b; border-left: 4px solid #f59e0b; padding: 10px 15px; margin-top: 10px; border-radius: 4px; }
+    </style>
 </head>
-
 <body>
-<main>
-  <header>
-    <h1>SUNAI</h1>
-    <p class="muted">AI task management dashboard</p>
-    <span id="connection" class="status">Checking API...</span>
-  </header>
+    <div class="container">
+        <header>
+            <h1>SUN.AI Advanced</h1>
+            <span id="status-badge" style="color: #4ade80; font-size: 0.9rem;">● System Online</span>
+        </header>
 
-  <section class="panel">
-    <h2>Create a task</h2>
+        <div class="card">
+            <h3>Agent Task Command Center</h3>
+            <textarea id="promptInput" placeholder="Enter your complex task, research query, or coding request..."></textarea>
+            <button onclick="runTask()">Execute Task with Planning</button>
+        </div>
 
-    <form id="taskForm">
-      <label for="goal">Task goal</label>
-      <textarea id="goal" maxlength="10000" required
-        placeholder="Example: Create an HVAC plan for a small house"></textarea>
+        <div class="card">
+            <h3>Execution Output & Verification Log</h3>
+            <pre id="outputLog">Ready for input...</pre>
+        </div>
 
-      <label for="requirements">Requirements</label>
-      <textarea id="requirements" maxlength="20000"
-        placeholder="Describe the expected output and constraints"></textarea>
-
-      <label for="attempts">Maximum attempts</label>
-      <select id="attempts">
-        <option value="1">1 attempt</option>
-        <option value="2">2 attempts</option>
-        <option value="3" selected>3 attempts</option>
-        <option value="4">4 attempts</option>
-        <option value="5">5 attempts</option>
-      </select>
-
-      <button id="createButton" type="submit">Create task</button>
-      <p id="formMessage" class="message" role="status"></p>
-    </form>
-  </section>
-
-  <section class="panel">
-    <div class="topline">
-      <h2>Tasks</h2>
-      <button class="secondary" id="refreshButton" type="button">
-        Refresh
-      </button>
+        <div class="card" id="patchCard" style="display:none;">
+            <h3>Self-Repair Code Diff (Approval Required)</h3>
+            <div id="patchContent"></div>
+            <button style="background: #22c55e;" onclick="resolvePatch(true)">Approve & Apply Patch</button>
+            <button style="background: #ef4444; margin-left: 10px;" onclick="resolvePatch(false)">Reject</button>
+        </div>
     </div>
 
-    <p class="muted">
-      Task status updates automatically every five seconds.
-    </p>
+    <script>
+        let currentPatchId = null;
 
-    <div id="tasks" aria-live="polite">Loading tasks...</div>
-    <p id="listMessage" class="message" role="status"></p>
-  </section>
-</main>
+        async function runTask() {
+            const prompt = document.getElementById('promptInput').value;
+            if (!prompt) return alert('Please enter a prompt.');
+            
+            document.getElementById('outputLog').innerText = 'Planning and executing task...';
+            
+            try {
+                const res = await fetch('/api/agent/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await res.json();
+                document.getElementById('outputLog').innerText = JSON.stringify(data, null, 2);
 
-<script>
-  // Change this when your API is hosted at another address.
-  const API_BASE = "http://127.0.0.1:8000";
-
-  const tasksElement = document.getElementById("tasks");
-  const connectionElement = document.getElementById("connection");
-  const formMessage = document.getElementById("formMessage");
-  const listMessage = document.getElementById("listMessage");
-  const createButton = document.getElementById("createButton");
-
-  let loadingTasks = false;
-
-  function element(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
-
-  async function api(path, options = {}) {
-    const response = await fetch(API_BASE + path, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-      }
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail || `Request failed (${response.status})`
-      );
-    }
-
-    return data;
-  }
-
-  async function checkConnection() {
-    try {
-      await api("/health");
-      connectionElement.textContent = "API connected";
-      connectionElement.className = "status completed";
-    } catch {
-      connectionElement.textContent = "API unavailable";
-      connectionElement.className = "status failed";
-    }
-  }
-
-  function renderTask(task) {
-    const card = element("article", "task");
-    const title = element("h3", "", task.goal);
-    const status = element("span", "status " + task.status, task.status);
-
-    card.append(title, status);
-
-    card.appendChild(element(
-      "p", "muted",
-      `ID: ${task.id}`
-    ));
-
-    card.appendChild(element(
-      "p", "",
-      `Progress: ${task.progress || "Not started"}`
-    ));
-
-    card.appendChild(element(
-      "p", "muted",
-      `Attempts: ${task.attempts}/${task.max_attempts}`
-    ));
-
-    if (task.requirements) {
-      const details = element("details");
-      details.appendChild(element("summary", "", "Requirements"));
-      details.appendChild(element("p", "", task.requirements));
-      card.appendChild(details);
-    }
-
-    if (task.result) {
-      const details = element("details");
-      details.appendChild(element("summary", "", "View result"));
-      details.appendChild(element("pre", "", task.result));
-      card.appendChild(details);
-    }
-
-    if (task.error) {
-      card.appendChild(element("p", "error", "Error: " + task.error));
-    }
-
-    if (task.status === "queued" || task.status === "running") {
-      const cancelButton = element("button", "danger", "Cancel task");
-      cancelButton.type = "button";
-
-      cancelButton.addEventListener("click", async () => {
-        cancelButton.disabled = true;
-
-        try {
-          await api(`/tasks/${encodeURIComponent(task.id)}/cancel`, {
-            method: "POST"
-          });
-          listMessage.textContent = "Cancellation requested.";
-          listMessage.className = "message success";
-          await loadTasks();
-        } catch (error) {
-          listMessage.textContent = error.message;
-          listMessage.className = "message error";
-          cancelButton.disabled = false;
+                if (data.pending_patch_id) {
+                    currentPatchId = data.pending_patch_id;
+                    document.getElementById('patchCard').style.display = 'block';
+                    loadPatches();
+                }
+            } catch (err) {
+                document.getElementById('outputLog').innerText = 'Error: ' + err.message;
+            }
         }
-      });
 
-      card.appendChild(cancelButton);
-    }
+        async function loadPatches() {
+            const res = await fetch('/api/agent/patches');
+            const data = await res.json();
+            if (data.patches && data.patches.length > 0) {
+                document.getElementById('patchContent').innerHTML = `<pre>${data.patches[0].diff}</pre>`;
+                currentPatchId = data.patches[0].id;
+                document.getElementById('patchCard').style.display = 'block';
+            }
+        }
 
-    return card;
-  }
-
-  async function loadTasks() {
-    if (loadingTasks) return;
-    loadingTasks = true;
-
-    try {
-      const tasks = await api("/tasks?limit=50&offset=0");
-      tasksElement.replaceChildren();
-
-      if (!Array.isArray(tasks) || tasks.length === 0) {
-        tasksElement.appendChild(
-          element("p", "muted", "No tasks yet. Create your first task.")
-        );
-      } else {
-        tasks.forEach(task => tasksElement.appendChild(renderTask(task)));
-      }
-
-      listMessage.textContent = "";
-      connectionElement.textContent = "API connected";
-      connectionElement.className = "status completed";
-    } catch (error) {
-      listMessage.textContent = error.message;
-      listMessage.className = "message error";
-      connectionElement.textContent = "API unavailable";
-      connectionElement.className = "status failed";
-    } finally {
-      loadingTasks = false;
-    }
-  }
-
-  document.getElementById("taskForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    createButton.disabled = true;
-    formMessage.textContent = "Creating task...";
-    formMessage.className = "message";
-
-    const payload = {
-      goal: document.getElementById("goal").value.trim(),
-      requirements: document.getElementById("requirements").value.trim(),
-      max_attempts: Number(document.getElementById("attempts").value)
-    };
-
-    try {
-      const task = await api("/tasks", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      formMessage.textContent = `Task created: ${task.id}`;
-      formMessage.className = "message success";
-      document.getElementById("goal").value = "";
-      document.getElementById("requirements").value = "";
-
-      await loadTasks();
-    } catch (error) {
-      formMessage.textContent = error.message;
-      formMessage.className = "message error";
-    } finally {
-      createButton.disabled = false;
-    }
-  });
-
-  document.getElementById("refreshButton").addEventListener(
-    "click", loadTasks
-  );
-
-  checkConnection();
-  loadTasks();
-  setInterval(() => {
-    checkConnection();
-    loadTasks();
-  }, 5000);
-</script>
+        async function resolvePatch(approved) {
+            if (!currentPatchId) return;
+            const res = await fetch('/api/agent/approve-patch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ patch_id: currentPatchId, approved })
+            });
+            const data = await res.json();
+            alert(data.message);
+            document.getElementById('patchCard').style.display = 'none';
+            currentPatchId = null;
+        }
+    </script>
 </body>
 </html>

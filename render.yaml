@@ -1,13 +1,18 @@
 services:
   - type: web
-    name: sun-ai-advanced
-    env: python
+    name: sunai-advanced
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.12
+      - key: SUNAI_API_TOKEN
+        generateValue: true
       - key: OPENAI_API_KEY
         sync: false
-      - key: SUNAI_SESSION_SECRET
-        generateValue: true
+      - key: OPENAI_BASE_URL
+        value: https://api.openai.com/v1
+      - key: SUNAI_MODEL
+        value: gpt-4o-mini
+      - key: SUNAI_DB_PATH
+        value: /var/data/sunai.db

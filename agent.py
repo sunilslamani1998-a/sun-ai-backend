@@ -82,8 +82,8 @@ async def ask_ai(
     """
     Send a prompt to Gemini asynchronously.
 
-    The synchronous SDK call runs in a worker thread so it does not
-    block FastAPI's event loop.
+    The native client.aio SDK call runs asynchronously without
+    blocking FastAPI's event loop.
     """
     cleaned_prompt = prompt.strip()
 
@@ -116,8 +116,7 @@ async def ask_ai(
 
     try:
         response = await asyncio.wait_for(
-            asyncio.to_thread(
-                client.models.generate_content,
+            client.aio.models.generate_content(
                 model=model_name,
                 contents=contents,
                 config=request_config,
@@ -144,5 +143,5 @@ async def ask_ai(
 
     except Exception as exc:
         raise AgentRequestError(
-            "The Gemini request failed."
+            f"The Gemini request failed: {str(exc)}"
         ) from exc

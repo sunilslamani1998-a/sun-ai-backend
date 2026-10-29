@@ -80,10 +80,7 @@ async def ask_ai(
     learning_context: Sequence[str] | None = None,
 ) -> str:
     """
-    Send a prompt to Gemini asynchronously.
-
-    The native client.aio SDK call runs asynchronously without
-    blocking FastAPI's event loop.
+    Send a prompt to Gemini asynchronously using the native client.aio interface.
     """
     cleaned_prompt = prompt.strip()
 
@@ -115,6 +112,7 @@ async def ask_ai(
     )
 
     try:
+        # Directly await the native async client call without asyncio.to_thread
         response = await asyncio.wait_for(
             client.aio.models.generate_content(
                 model=model_name,

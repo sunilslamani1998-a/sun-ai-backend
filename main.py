@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -12,14 +13,28 @@ import database
 import learning
 import memory
 import self_improve
+
 from agent import (
     AgentConfigurationError,
     AgentRequestError,
     ask_ai,
 )
+
 from config import settings
 from security import AuthenticatedUser
 from verification import verify_response
+
+
+# -------------------------------------------------------------------
+# Logging
+# -------------------------------------------------------------------
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
 # -------------------------------------------------------------------
@@ -29,8 +44,20 @@ from verification import verify_response
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize the database when the application starts."""
-    database.init_db()
+
+    logger.info("Starting SUN.AI application")
+
+    try:
+        database.init_db()
+        logger.info("Database initialized successfully")
+
+    except Exception:
+        logger.exception("Database initialization failed")
+        raise
+
     yield
+
+    logger.info("SUN.AI application shutting down")
 
 
 app = FastAPI(
@@ -43,10 +70,6 @@ app = FastAPI(
 
 # -------------------------------------------------------------------
 # CORS
-# -------------------------------------------------------------------
-#
-# For production, replace the wildcard with the exact frontend origin.
-# CORS is not authentication and does not protect the API token.
 # -------------------------------------------------------------------
 
 app.add_middleware(
@@ -74,10 +97,12 @@ class MemoryCreateRequest(BaseModel):
         min_length=1,
         max_length=12000,
     )
+
     category: str = Field(
         default="general",
         max_length=64,
     )
+
     importance: int = Field(
         default=1,
         ge=1,
@@ -90,10 +115,12 @@ class FeedbackRequest(BaseModel):
         min_length=1,
         max_length=12000,
     )
+
     rating: int = Field(
         ge=1,
         le=5,
     )
+
     details: str | None = Field(
         default=None,
         max_length=12000,
@@ -105,10 +132,12 @@ class LearningRecordRequest(BaseModel):
         min_length=1,
         max_length=200,
     )
+
     summary: str = Field(
         min_length=1,
         max_length=12000,
     )
+
     source: str | None = Field(
         default=None,
         max_length=1000,
@@ -120,14 +149,17 @@ class ImprovementProposalRequest(BaseModel):
         min_length=1,
         max_length=200,
     )
+
     description: str = Field(
         min_length=1,
         max_length=12000,
     )
+
     target_file: str = Field(
         min_length=1,
         max_length=255,
     )
+
     proposed_code: str = Field(
         min_length=1,
         max_length=100000,
@@ -139,6 +171,7 @@ class ProposalStatusRequest(BaseModel):
         min_length=1,
         max_length=32,
     )
+
     test_result: str | None = Field(
         default=None,
         max_length=12000,
@@ -152,11 +185,19 @@ class ProposalStatusRequest(BaseModel):
 @app.get("/health")
 async def health() -> dict[str, Any]:
     """Return application and database health."""
-    database_ok = database.check_database()
+
+    try:
+        database_ok = database.check_database()
+
+    except Exception:
+        logger.exception("Database health check failed")
+        database_ok = False
 
     return {
         "status": "ok" if database_ok else "degraded",
-        "database": "connected" if database_ok else "unavailable",
+        "database": (
+            "connected" if database_ok else "unavailable"
+        ),
         "app": settings.app_name,
         "version": "0.1.0",
     }
@@ -171,7 +212,9 @@ async def chat(
     body: ChatRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Send a prompt to Gemini with relevant memory and learning context."""
+
+    """Send a prompt to Gemini with memory and learning context."""
+
     cleaned_prompt = body.prompt.strip()
 
     if not cleaned_prompt:
@@ -180,53 +223,70 @@ async def chat(
             detail="Prompt cannot be empty.",
         )
 
-    memory_context = memory.build_memory_context(
-        user_id=user_id,
-        query=cleaned_prompt,
-        limit=8,
-    )
-
-    learning_context = learning.build_learning_context(
-        user_id=user_id,
-        limit=5,
-    )
-
     try:
+        memory_context = memory.build_memory_context(
+            user_id=user_id,
+            query=cleaned_prompt,
+            limit=8,
+        )
+
+        learning_context = learning.build_learning_context(
+            user_id=user_id,
+            limit=5,
+        )
+
         response = await ask_ai(
             prompt=cleaned_prompt,
             memories=memory_context,
             learning_context=learning_context,
         )
 
+        verification = verify_response(
+            response=response,
+            original_prompt=cleaned_prompt,
+        )
+
+        return {
+            "response": response,
+            "verification": verification.to_dict(),
+            "memory_used": len(memory_context),
+            "learning_records_used": len(learning_context),
+        }
+
     except AgentConfigurationError as exc:
+        logger.exception("SUN.AI agent configuration error")
+
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc
 
     except AgentRequestError as exc:
+        logger.exception("SUN.AI Gemini request failed")
+
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),
         ) from exc
 
     except ValueError as exc:
+        logger.warning("Invalid chat request: %s", exc)
+
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(exc),
         ) from exc
 
-    verification = verify_response(
-        response=response,
-        original_prompt=cleaned_prompt,
-    )
+    except HTTPException:
+        raise
 
-    return {
-        "response": response,
-        "verification": verification.to_dict(),
-        "memory_used": len(memory_context),
-        "learning_records_used": len(learning_context),
-    }
+    except Exception as exc:
+        logger.exception("Unexpected SUN.AI chat error")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected chat processing error occurred.",
+        ) from exc
 
 
 # -------------------------------------------------------------------
@@ -238,7 +298,7 @@ async def create_memory(
     body: MemoryCreateRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Create a memory."""
+
     try:
         memory_id = memory.save_memory(
             user_id=user_id,
@@ -264,7 +324,7 @@ async def list_memory(
     user_id: AuthenticatedUser,
     limit: int = Query(default=100, ge=1, le=500),
 ) -> dict[str, Any]:
-    """List stored memories."""
+
     items = memory.list_memories(
         user_id=user_id,
         limit=limit,
@@ -282,7 +342,7 @@ async def search_memory(
     q: str = Query(min_length=1, max_length=1000),
     limit: int = Query(default=10, ge=1, le=100),
 ) -> dict[str, Any]:
-    """Search stored memories."""
+
     items = memory.search_memories(
         user_id=user_id,
         query=q,
@@ -300,7 +360,7 @@ async def remove_memory(
     memory_id: int,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Delete one memory."""
+
     deleted = memory.delete_user_memory(
         user_id=user_id,
         memory_id=memory_id,
@@ -322,7 +382,7 @@ async def remove_memory(
 async def remove_all_memory(
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Delete all memories for the authenticated user."""
+
     deleted_count = memory.clear_user_memories(
         user_id=user_id,
     )
@@ -342,7 +402,7 @@ async def submit_feedback(
     body: FeedbackRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Record user feedback."""
+
     try:
         feedback_id = learning.record_feedback(
             user_id=user_id,
@@ -368,7 +428,7 @@ async def list_feedback(
     user_id: AuthenticatedUser,
     limit: int = Query(default=100, ge=1, le=500),
 ) -> dict[str, Any]:
-    """Retrieve feedback history."""
+
     items = learning.get_feedback_history(
         user_id=user_id,
         limit=limit,
@@ -380,11 +440,15 @@ async def list_feedback(
     }
 
 
+# -------------------------------------------------------------------
+# Learning
+# -------------------------------------------------------------------
+
 @app.get("/api/learning")
 async def learning_summary(
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Return feedback statistics and saved learning records."""
+
     return {
         "feedback_summary": learning.summarize_feedback(
             user_id=user_id,
@@ -400,7 +464,7 @@ async def create_learning_record(
     body: LearningRecordRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Save a learning record."""
+
     try:
         record_id = learning.save_learning_record(
             user_id=user_id,
@@ -430,7 +494,7 @@ async def propose_improvement(
     body: ImprovementProposalRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Create a validated code improvement proposal."""
+
     result = self_improve.create_improvement_proposal(
         user_id=user_id,
         title=body.title,
@@ -458,7 +522,7 @@ async def list_improvements(
     ),
     limit: int = Query(default=100, ge=1, le=500),
 ) -> dict[str, Any]:
-    """List code improvement proposals."""
+
     proposals = self_improve.list_improvement_proposals(
         user_id=user_id,
         status=proposal_status,
@@ -477,7 +541,7 @@ async def update_improvement(
     body: ProposalStatusRequest,
     user_id: AuthenticatedUser,
 ) -> dict[str, Any]:
-    """Update a proposal's review status."""
+
     try:
         updated = self_improve.update_proposal_status(
             user_id=user_id,

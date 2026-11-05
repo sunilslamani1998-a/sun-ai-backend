@@ -27,6 +27,11 @@ class Settings(BaseSettings):
         alias="GEMINI_MODEL",
     )
 
+    gemini_fallback_models: str = Field(
+        default="gemini-2.0-flash,gemini-2.5-flash-lite",
+        alias="GEMINI_FALLBACK_MODELS",
+    )
+
     gemini_live_model: str = Field(
         default="",
         alias="GEMINI_LIVE_MODEL",

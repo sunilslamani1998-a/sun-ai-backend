@@ -253,9 +253,7 @@ async def ask_ai(
         ) from exc
 
     finally:
-        # The asynchronous context manager owns the async client lifecycle.
-        # Do not call synchronous client.close() here.
-
+        pass
 
 def _build_live_system_instruction(
     language: str,

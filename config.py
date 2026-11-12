@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
+    # "web" answers chat by returning source-backed search results without an LLM.
+    # "gemini" opts into generated answers through Gemini.
+    assistant_mode: str = Field(default="web", alias="ASSISTANT_MODE")
+
     sunai_api_token: SecretStr = Field(
         default=SecretStr(""),
         alias="SUNAI_API_TOKEN",
@@ -60,7 +64,6 @@ class Settings(BaseSettings):
     max_prompt_length: int = 12000
     max_memory_items: int = 100
 
-    # Allow more time for Gemini responses during troubleshooting.
     request_timeout_seconds: int = Field(
         default=90,
         alias="REQUEST_TIMEOUT_SECONDS",

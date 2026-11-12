@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class AgentConfigurationError(RuntimeError):
-    """Raised when the AI agent configuration is invalid."""
+    """Raised when the assistant's required configuration is invalid."""
 
 
 class AgentRequestError(RuntimeError):
-    """Raised when a Gemini request fails."""
+    """Raised when an upstream assistant or search request fails."""
 
 
 def _get_client(http_timeout_ms: int | None = None):
@@ -87,18 +87,65 @@ def _is_transient_gemini_error(exc: Exception) -> bool:
     }
 
 
+async def _answer_from_web(prompt: str) -> str:
+    """Return source excerpts directly, without calling a generative AI model."""
+    try:
+        from research import (
+            ResearchConfigurationError,
+            ResearchProviderError,
+            search_web,
+        )
+
+        results = await search_web(prompt, max_results=5)
+    except ResearchConfigurationError as exc:
+        raise AgentConfigurationError(str(exc)) from exc
+    except ResearchProviderError as exc:
+        raise AgentRequestError("Internet search is temporarily unavailable. Please try again.") from exc
+
+    if not results:
+        return (
+            "I couldn't find matching web results. Try a more specific search query. "
+            "This response used web search only; no AI model was called."
+        )
+
+    # Search excerpts and pages are untrusted input. Present them as quoted source
+    # material; do not execute or follow instructions found in them.
+    sections = [
+        "Web search results (no generative AI model was used). These excerpts may be incomplete; open and verify the sources:",
+    ]
+    for index, result in enumerate(results, start=1):
+        title = str(result.get("title") or "Untitled source").strip()[:300]
+        excerpt = str(result.get("content") or "No excerpt provided.").strip()[:1600]
+        url = str(result.get("url") or "").strip()
+        published = str(result.get("published_date") or "").strip()
+        heading = f"[{index}] {title}"
+        if published:
+            heading += f" ({published[:80]})"
+        sections.append(f"{heading}\n{excerpt}\nSource: {url}")
+    return "\n\n".join(sections)
+
+
 async def ask_ai(
     prompt: str,
     memories: str | Sequence[str] | None = None,
     learning_context: str | Sequence[str] | None = None,
     language: str = "english",
 ) -> str:
-    """Generate a response, retrying transient failures and configured fallbacks."""
+    """Answer in configured web-only mode or use Gemini when explicitly enabled."""
     if not isinstance(prompt, str) or not prompt.strip():
         raise ValueError("Prompt cannot be empty.")
     prompt = prompt.strip()
     if len(prompt) > settings.max_prompt_length:
         raise ValueError("Prompt exceeds the maximum allowed length.")
+
+    mode = str(getattr(settings, "assistant_mode", "web")).strip().lower()
+    if mode == "web":
+        # Web mode is intentionally deterministic: it returns search result
+        # excerpts and does not initialize or call an LLM provider.
+        normalize_language(language)  # Validate the selected language value.
+        return await _answer_from_web(prompt)
+    if mode != "gemini":
+        raise AgentConfigurationError("ASSISTANT_MODE must be either 'web' or 'gemini'.")
 
     started_at = time.monotonic()
     try:
@@ -124,8 +171,6 @@ async def ask_ai(
 
         async with client.aio as async_client:
             for index, candidate in enumerate(models):
-                # At most one short retry on the primary model, then configured
-                # alternates. Avoid multiplying long request timeouts.
                 attempts = 2 if index == 0 else 1
                 for attempt in range(attempts):
                     try:

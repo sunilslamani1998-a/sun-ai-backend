@@ -1,13 +1,24 @@
-# Android/browser web-only mode
+# SUN.AI / Bittu on Android
 
-SUN.AI's dashboard is a responsive web app; on Android, open its HTTPS service URL in Chrome. This mode does not require installing or compiling an APK.
+SUN.AI's responsive dashboard is available at the backend root URL. Deploy with `uvicorn android_app:app --host 0.0.0.0 --port $PORT` or the Render blueprint, then open the HTTPS service URL in Chrome on Android.
 
-## Run chat without a generative AI provider
+## Search-first chat and internet learning without a generative AI
 
-Set `ASSISTANT_MODE=web`. In this mode, Bittu sends the user's query to the configured web search provider and returns the search excerpts and source links directly. It does not initialize or call Gemini (or another generative model). This is source retrieval, not open-ended AI reasoning: answers may be incomplete, and users should open and verify cited sources.
+With `ASSISTANT_MODE=web`, text chat performs an explicit bounded web search and returns excerpts and source URLs. `POST /api/web-learning` does the same and stores excerpts as a **pending** learning record. Approve or reject records in the dashboard; only approved records are provided as context to the configured chat mode. This is retrieval and storage, not model training or advanced open-ended reasoning.
 
-Configure `TAVILY_API_KEY` in the hosting service's environment settings. Do not put that key or `SUNAI_API_TOKEN` in the browser or commit either secret. Keep `SUNAI_API_TOKEN` set; API authentication remains required.
+Set `TAVILY_API_KEY` in the hosting provider's secret environment settings. Keep `SUNAI_API_TOKEN` private. Search results are untrusted; verify the linked sources. Bittu does not crawl continuously or execute actions from page content.
 
-The repository's Render configuration defaults to web-only chat. After deployment completes, open the Render HTTPS URL on Android, enter the SUN.AI API token, and allow microphone access if using browser speech input. HTTPS is required for microphone access on most browsers. A free hosting instance may sleep when idle.
+## Android voice
 
-Gemini Live voice streaming is a separate feature and still requires Gemini credentials/model configuration. Web-only chat provides text answers from web search; it does not create live speech conversation or perform arbitrary phone actions.
+The dashboard provides tap-to-speak using browser SpeechRecognition when the browser supports it, then browser speech synthesis for spoken output. HTTPS and microphone permission are needed. Device and language support vary. It is not always-listening like Siri and does not control Android settings or apps. The separate Gemini Live backend still requires its configured Gemini API; web search mode does not provide live generative voice.
+
+## Existing dashboard capabilities
+
+- Search-first text chat and source links
+- Research records pending owner approval
+- Owner-scoped memory management
+- Feedback submission
+- Existing code improvement proposal workflow (no automatic file writes or code execution)
+- Browser tap-to-speak and spoken responses
+
+The API remains protected by the SUN.AI bearer token. Free hosting may sleep when idle and `/tmp` storage can be lost when the service restarts; use persistent storage for durable records.
